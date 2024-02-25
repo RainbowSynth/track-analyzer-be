@@ -1,6 +1,7 @@
 import requests
 import dotenv
 import os
+from urllib.parse import urlencode
 
 dotenv.load_dotenv(".env")
 client_id = os.environ['SPOTIFY_ID']
@@ -38,4 +39,22 @@ def analyze_track(track_details):
         "durations": durations,
         "loudness": loudness,
         "pitches": pitches
+    }
+
+def get_id_from_name(track_name):
+    access_token = get_spotify_access_token(client_id, client_secret)
+    params = {
+        'q': track_name,
+        'type': 'track',
+        'limit': 1,
+    }
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+    }
+    search_url = 'https://api.spotify.com/v1/search?' + urlencode(params)
+    response = requests.get(search_url, headers=headers)
+    response_data = response.json()
+    track_id = response_data['tracks']['items'][0]['id'] if response_data['tracks']['items'] else None
+    return {
+        "track_id": track_id
     }

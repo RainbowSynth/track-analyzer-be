@@ -11,6 +11,10 @@ async def analyze(track_id: str):
     data = analyze_track(track_info)
     return JSONResponse(content=data)
 
+@app.get('/get_track')
+async def get_track(track_name: str):
+    return JSONResponse(content=get_id_from_name(track_name))
+
 @app.get("/")
 async def root():
     return "I'm a teapot"
