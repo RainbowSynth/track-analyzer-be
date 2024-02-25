@@ -35,8 +35,8 @@ def analyze_album_cover(track_id):
     
     # Resize the image to reduce processing time, maintaining aspect ratio
     aspect_ratio = image.height / image.width
-    new_height = int(100 * aspect_ratio)
-    image = image.resize((100, new_height))
+    new_height = int(10 * aspect_ratio)
+    image = image.resize((10, new_height))
     
     # Convert the image data to a list of RGB values
     pixels = np.array(image).reshape(-1, 3)
