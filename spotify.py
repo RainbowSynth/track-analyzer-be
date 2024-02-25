@@ -2,6 +2,10 @@ import requests
 import dotenv
 import os
 from urllib.parse import urlencode
+import imageio
+from PIL import Image
+import numpy as np
+from sklearn.cluster import KMeans
 
 dotenv.load_dotenv(".env")
 client_id = os.environ['SPOTIFY_ID']
@@ -16,6 +20,39 @@ def get_spotify_access_token(client_id, client_secret):
     })
     auth_response_data = auth_response.json()
     return auth_response_data['access_token']
+
+def analyze_album_cover(track_id):
+    access_token = get_spotify_access_token(client_id, client_secret)
+    search_url = f'https://api.spotify.com/v1/tracks/{track_id}'
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+    }
+    album_art = requests.get(search_url, headers=headers).json()['album']['images'][0]['url']
+    image = Image.open(imageio.imread(album_art))
+    
+    # Convert the image to RGB
+    image = image.convert('RGB')
+    
+    # Resize the image to reduce processing time, maintaining aspect ratio
+    aspect_ratio = image.height / image.width
+    new_height = int(100 * aspect_ratio)
+    image = image.resize((100, new_height))
+    
+    # Convert the image data to a list of RGB values
+    pixels = np.array(image).reshape(-1, 3)
+    
+    # Use KMeans clustering to find main colors
+    kmeans = KMeans(n_clusters=2)
+    kmeans.fit(pixels)
+    
+    # The cluster centers are our main colors
+    main_colors = kmeans.cluster_centers_
+    
+    # Convert to integers, since RGB values should be integers
+    main_colors = main_colors.round().astype(int).tolist()
+    
+    return main_colors
+
 
 def get_analysis(track_id):
     access_token = get_spotify_access_token(client_id, client_secret)

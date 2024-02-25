@@ -9,7 +9,11 @@ app = FastAPI()
 async def analyze(track_id: str):
     track_info = get_analysis(track_id)
     data = analyze_track(track_info)
-    return JSONResponse(content=data)
+    colors = analyze_album_cover(track_id)
+    return JSONResponse(content={
+        "analysis": data,
+        "colors": colors
+    })
 
 @app.get('/get_track')
 async def get_track(track_name: str):
@@ -18,6 +22,7 @@ async def get_track(track_name: str):
 @app.get("/")
 async def root():
     return "I'm a teapot"
+
 
 if __name__ == "__main__":
     import uvicorn
